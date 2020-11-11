@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'dart:async';
 import 'dart:typed_data';
+import 'Repository.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -22,25 +23,9 @@ class _HomePageState extends State<HomePage> {
     showLoading = false;
   }
 
-  Future downLoadFromUrl(String url) async {
-    setState(() {
-      showLoading = true;
-    });
-    var request = await HttpClient().getUrl(Uri.parse(url));
-    var response = await request.close();
-    Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    sharePdf(bytes);
-  }
-
-  Future sharePdf(Uint8List bytes) async {
-    setState(() {
-      showLoading = false;
-    });
-    await Share.file('ESYS AMLOG', 'amlog.pdf', bytes, '*/*');
-  }
-
   @override
   Widget build(BuildContext context) {
+    Repository repository = Repository();
     return Scaffold(
       appBar: AppBar(
         title: Text('Pdf Share'),
@@ -58,7 +43,10 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(8.0),
             child: RaisedButton(
               onPressed: () {
-                downLoadFromUrl(
+                setState(() {
+                  showLoading = true;
+                });
+                repository.downLoadFromUrl(
                     'https://www.maa.org/external_archive/devlin/LockhartsLament.pdf');
               },
               child: Text('Share'),
