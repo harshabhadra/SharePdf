@@ -1,6 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
-import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -12,10 +14,29 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Future sharePdf() async {
-    final ByteData bytes = await rootBundle.load('assets/sample.pdf');
-    await Share.file(
-        'esys pdf', 'sample.pdf', bytes.buffer.asUint8List(), '*/*');
+  bool showLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    showLoading = false;
+  }
+
+  Future downLoadFromUrl(String url) async {
+    setState(() {
+      showLoading = true;
+    });
+    var request = await HttpClient().getUrl(Uri.parse(url));
+    var response = await request.close();
+    Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+    sharePdf(bytes);
+  }
+
+  Future sharePdf(Uint8List bytes) async {
+    setState(() {
+      showLoading = false;
+    });
+    await Share.file('ESYS AMLOG', 'amlog.pdf', bytes, '*/*');
   }
 
   @override
@@ -24,11 +45,26 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text('Pdf Share'),
       ),
-      body: Center(
-        child: RaisedButton(
-          onPressed: sharePdf,
-          child: Text('Share'),
-        ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          showLoading
+              ? Container(
+                  child: CircularProgressIndicator(),
+                )
+              : Container(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: RaisedButton(
+              onPressed: () {
+                downLoadFromUrl(
+                    'https://www.maa.org/external_archive/devlin/LockhartsLament.pdf');
+              },
+              child: Text('Share'),
+            ),
+          ),
+        ],
       ),
     );
   }
