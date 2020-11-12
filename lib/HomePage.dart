@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
                 setState(() {
                   showLoading = true;
                 });
-                repository.downLoadFromUrl(
+                repository.urlFileShare(
                     'https://www.maa.org/external_archive/devlin/LockhartsLament.pdf');
               },
               child: Text('Share'),
